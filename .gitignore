@@ -1,0 +1,9 @@
+# arcads-agent-skills — mirror upstream gitignore rules scoped to subdirectory
+arcads-agent-skills/.env
+arcads-agent-skills/.env.*
+!arcads-agent-skills/.env.example
+arcads-agent-skills/MASTER_CONTEXT.md
+arcads-agent-skills/.claude/skills/
+arcads-agent-skills/.cursor/skills/
+arcads-agent-skills/.DS_Store
+arcads-agent-skills/*.log
