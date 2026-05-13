@@ -74,7 +74,7 @@ def process_csv():
 
         for lead in unqualified_leads:
             try:
-                # Generate website spec using Claude
+                # Generate website spec using Claude (with extended timeout)
                 spec_data = generate_website_spec(lead)
                 website_spec = spec_data['website_spec']
 
@@ -147,4 +147,4 @@ def get_website(website_id):
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='localhost', port=5000)
+    app.run(debug=True, host='localhost', port=5000, threaded=True)

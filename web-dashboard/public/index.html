@@ -391,13 +391,19 @@
             message.innerHTML = '';
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 second timeout
+
                 const response = await fetch(`${API_URL}/api/process-csv`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ csv_content })
+                    body: JSON.stringify({ csv_content }),
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     const error = await response.json();
@@ -407,7 +413,11 @@
                 const data = await response.json();
                 displayResults(data);
             } catch (error) {
-                message.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                if (error.name === 'AbortError') {
+                    message.innerHTML = `<div class="error">❌ Error: Request timeout - Processing took too long. Try with fewer leads.</div>`;
+                } else {
+                    message.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                }
                 processing.style.display = 'none';
                 results.style.display = 'block';
             }
