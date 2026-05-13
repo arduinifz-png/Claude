@@ -369,6 +369,8 @@
             ? 'http://localhost:5000'
             : 'https://your-railway-app.railway.app';
 
+        console.log('API_URL:', API_URL);
+
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -391,6 +393,9 @@
             message.innerHTML = '';
 
             try {
+                console.log('Sending CSV to:', `${API_URL}/api/process-csv`);
+                console.log('CSV content length:', csv_content.length);
+
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 second timeout
 
@@ -405,14 +410,19 @@
 
                 clearTimeout(timeoutId);
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Failed to process CSV');
                 }
 
                 const data = await response.json();
+                console.log('Response data:', data);
                 displayResults(data);
             } catch (error) {
+                console.error('Fetch error:', error);
                 if (error.name === 'AbortError') {
                     message.innerHTML = `<div class="error">❌ Error: Request timeout - Processing took too long. Try with fewer leads.</div>`;
                 } else {
