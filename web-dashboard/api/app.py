@@ -31,10 +31,14 @@ client = anthropic.Anthropic(api_key=api_key)
 
 # Redis/Upstash connection
 redis_url = os.environ.get("UPSTASH_REDIS_URL")
-if redis_url:
-    redis_client = redis.from_url(redis_url, decode_responses=True)
-else:
-    redis_client = None  # Fallback for local testing
+redis_client = None
+if redis_url and redis_url != "redis://localhost:6379":
+    try:
+        redis_client = redis.from_url(redis_url, decode_responses=True, socket_timeout=5)
+        redis_client.ping()
+    except Exception as e:
+        print(f"Warning: Could not connect to Redis at {redis_url}: {e}")
+        redis_client = None
 
 # Import website generator
 import sys
