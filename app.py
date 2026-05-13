@@ -18,7 +18,13 @@ import redis
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Initialize Redis client for storing generated websites
 try:
