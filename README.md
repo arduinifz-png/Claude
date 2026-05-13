@@ -13,20 +13,23 @@ An AI-powered agent that processes CSV files of leads, identifies those without 
 
 ### Prerequisites
 - Python 3.8+
-- Anthropic API key
+- Anthropic API key (get one at [console.anthropic.com](https://console.anthropic.com))
 
-### Installation
+### Quick Start
+
+```bash
+# Run automated setup
+bash setup.sh
+```
+
+Then edit `.env` and add your `ANTHROPIC_API_KEY`.
+
+### Manual Installation
 
 ```bash
 pip install -r requirements.txt
-```
-
-### Configuration
-
-1. Create a `.env` file with your API key:
-```bash
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# Edit .env with your ANTHROPIC_API_KEY
 ```
 
 2. Prepare your CSV file with lead data. Required columns:
@@ -37,21 +40,39 @@ cp .env.example .env
 
 ## Usage
 
+### Step 1: Qualify Leads & Generate Specifications
+
 ```bash
 python lead_agent.py <csv_file> [output_file.json]
 ```
 
-### Example
-
+**Example:**
 ```bash
 python lead_agent.py example_leads.csv results.json
 ```
 
 This will:
-1. Load all leads from the CSV
+1. Load all leads from your CSV
 2. Identify leads without websites
-3. Generate detailed website specifications for each unqualified lead
+3. Use Claude to generate detailed website specifications
 4. Save results to `results.json`
+
+### Step 2: Generate HTML Websites (Optional)
+
+```bash
+python website_generator.py <results_json_file> [output_directory]
+```
+
+**Example:**
+```bash
+python website_generator.py results.json generated_websites/
+```
+
+This will:
+1. Read the specifications from Step 1
+2. Generate professional HTML websites
+3. Apply design recommendations
+4. Save individual HTML files for each lead
 
 ## Output
 
@@ -89,3 +110,78 @@ Mike's Auto Repair,mike@autorepair.local,555-0103,Auto Repair,https://mikesautor
 ## Model
 
 Uses Claude Opus 4.7 (latest) for superior reasoning and comprehensive website specification generation.
+
+## Complete Workflow Example
+
+```bash
+# 1. Setup
+bash setup.sh
+
+# 2. Edit .env with your API key
+
+# 3. Run the lead qualification agent
+python lead_agent.py your_leads.csv results.json
+
+# 4. (Optional) Generate HTML websites
+python website_generator.py results.json generated_websites/
+
+# 5. Review generated specifications and HTML files
+# - results.json contains the detailed specifications
+# - generated_websites/ contains ready-to-use HTML files
+```
+
+## Outputs
+
+### results.json
+Comprehensive JSON file containing:
+```json
+{
+  "total_leads": 10,
+  "unqualified_leads": 6,
+  "website_specs": [
+    {
+      "lead": { /* original lead data */ },
+      "website_spec": {
+        "purpose": "...",
+        "seo_strategy": { /* keywords, meta descriptions */ },
+        "content_architecture": { /* pages and sections */ },
+        "visual_design": { /* colors, fonts */ },
+        "core_features": [ /* required functionality */ ],
+        "cta_strategy": { /* conversion optimization */ },
+        "technical_seo": { /* performance, structure */ }
+      }
+    }
+  ]
+}
+```
+
+### generated_websites/
+HTML files ready for:
+- Publishing directly
+- Integrating with static site builders
+- Hosting on any web server
+- Further customization
+
+## Tips for Best Results
+
+1. **CSV Data Quality**: Include relevant fields like industry, company type, location
+2. **Website Column**: Leave blank or use "none"/"N/A" for leads without websites
+3. **Email Contact**: Ensure valid email addresses for lead contact
+4. **Industry Specificity**: The agent tailors suggestions based on industry
+
+## Troubleshooting
+
+**API Key Error?**
+```bash
+# Verify .env has your API key
+cat .env | grep ANTHROPIC_API_KEY
+
+# Or set as environment variable
+export ANTHROPIC_API_KEY="sk-ant-..."
+python lead_agent.py leads.csv
+```
+
+**CSV Format Error?**
+- Ensure first row is header with column names
+- Use "name", "email", "website" as column names
+- Check for encoding issues (should be UTF-8)
