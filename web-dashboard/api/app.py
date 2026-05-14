@@ -44,12 +44,13 @@ if redis_url and redis_url != "redis://localhost:6379":
 # Import website generator
 import sys
 api_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(api_dir))
+web_dashboard_dir = os.path.dirname(api_dir)  # web-dashboard
+project_root = os.path.dirname(web_dashboard_dir)  # /home/user/Claude
 sys.path.insert(0, project_root)
 from website_generator import generate_full_html
 
 # Dashboard directory for serving static files
-dashboard_dir = os.path.join(os.path.dirname(api_dir), 'public')
+dashboard_dir = os.path.join(web_dashboard_dir, 'public')
 
 
 def read_csv_content(csv_text: str) -> list[dict]:
