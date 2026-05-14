@@ -42,7 +42,8 @@ if redis_url and redis_url != "redis://localhost:6379":
 
 # Import website generator
 import sys
-sys.path.insert(0, '/home/user/Claude')
+app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, app_dir)
 from website_generator import generate_full_html
 
 
