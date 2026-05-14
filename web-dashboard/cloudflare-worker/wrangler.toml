@@ -1,0 +1,22 @@
+name = "lead-websites"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+routes = [
+  { pattern = "yourapp.com/website/*", zone_name = "yourapp.com" }
+]
+
+[build]
+command = ""
+watch_paths = ["src/**/*.js"]
+
+[build.upload]
+format = "service-worker"
+
+[[env.production.kv_namespaces]]
+binding = "WEBSITES"
+id = "your-kv-id"
+
+[[env.production.env]]
+UPSTASH_REDIS_URL = "your-upstash-redis-url"
