@@ -53,3 +53,13 @@ ehthumbs.db
 .cache/
 *.log
 node_modules/
+.env
+__pycache__/
+*.pyc
+.DS_Store
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+venv/
