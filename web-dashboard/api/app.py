@@ -24,10 +24,11 @@ CORS(app)
 
 # Initialize clients
 api_key = os.environ.get("ANTHROPIC_API_KEY")
-if not api_key:
-    raise ValueError("ANTHROPIC_API_KEY not found in environment")
-
-client = anthropic.Anthropic(api_key=api_key)
+client = None
+if api_key:
+    client = anthropic.Anthropic(api_key=api_key)
+else:
+    print("Warning: ANTHROPIC_API_KEY not set. Website generation will not work.")
 
 # Redis/Upstash connection
 redis_url = os.environ.get("UPSTASH_REDIS_URL")
@@ -66,6 +67,9 @@ def qualify_leads(leads: list[dict]) -> list[dict]:
 
 def generate_website_spec(lead: dict) -> dict:
     """Use Claude to generate website specification."""
+    if not client:
+        raise ValueError("ANTHROPIC_API_KEY not configured. Cannot generate website specifications.")
+
     lead_info = json.dumps(lead, indent=2)
 
     prompt = f"""You are a expert web designer and SEO strategist. Based on this lead information, generate a comprehensive website specification with great SEO.
