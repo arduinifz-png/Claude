@@ -41,16 +41,21 @@ if redis_url and redis_url != "redis://localhost:6379":
         print(f"Warning: Could not connect to Redis at {redis_url}: {e}")
         redis_client = None
 
-# Import website generator
+# Import website generator and set up paths
 import sys
-api_dir = os.path.dirname(os.path.abspath(__file__))
-web_dashboard_dir = os.path.dirname(api_dir)  # web-dashboard
-project_root = os.path.dirname(web_dashboard_dir)  # /home/user/Claude
-sys.path.insert(0, project_root)
+from pathlib import Path
+
+# Use Path for robust cross-platform path handling
+app_file = Path(__file__).resolve()
+api_dir = app_file.parent  # /app/web-dashboard/api
+web_dashboard_dir = api_dir.parent  # /app/web-dashboard
+project_root = web_dashboard_dir.parent  # /app
+
+sys.path.insert(0, str(project_root))
 from website_generator import generate_full_html
 
 # Dashboard directory for serving static files
-dashboard_dir = os.path.join(web_dashboard_dir, 'public')
+dashboard_dir = str(web_dashboard_dir / 'public')
 
 
 def read_csv_content(csv_text: str) -> list[dict]:
