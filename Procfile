@@ -1,1 +1,1 @@
-web: cd web-dashboard/api && gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+web: cd web-dashboard/api && gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --access-logfile - --log-level debug
