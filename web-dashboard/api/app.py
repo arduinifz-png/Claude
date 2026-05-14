@@ -57,6 +57,18 @@ from website_generator import generate_full_html
 # Dashboard directory for serving static files
 dashboard_dir = str(web_dashboard_dir / 'public')
 
+# Log startup info for debugging
+print(f"Flask app starting...")
+print(f"  app_file: {app_file}")
+print(f"  api_dir: {api_dir}")
+print(f"  web_dashboard_dir: {web_dashboard_dir}")
+print(f"  project_root: {project_root}")
+print(f"  dashboard_dir: {dashboard_dir}")
+print(f"  dashboard_dir exists: {Path(dashboard_dir).exists()}")
+if Path(dashboard_dir).exists():
+    files = list(Path(dashboard_dir).iterdir())
+    print(f"  files in dashboard_dir: {[f.name for f in files[:5]]}")
+
 
 def read_csv_content(csv_text: str) -> list[dict]:
     """Parse CSV content from text."""
@@ -120,13 +132,22 @@ Respond in JSON format with these exact keys: purpose, seo_strategy, content_arc
 @app.route('/')
 def index():
     """Serve the dashboard."""
-    return send_from_directory(dashboard_dir, 'index.html')
+    try:
+        print(f"Serving dashboard from: {dashboard_dir}")
+        return send_from_directory(dashboard_dir, 'index.html')
+    except Exception as e:
+        print(f"Error serving dashboard: {e}")
+        return jsonify({"error": f"Failed to serve dashboard: {str(e)}"}), 500
 
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files."""
-    return send_from_directory(dashboard_dir, filename)
+    try:
+        return send_from_directory(dashboard_dir, filename)
+    except Exception as e:
+        print(f"Error serving static file {filename}: {e}")
+        return jsonify({"error": f"Failed to serve file: {str(e)}"}), 500
 
 
 @app.route('/api/health', methods=['GET'])
