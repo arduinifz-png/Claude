@@ -7,8 +7,7 @@ Handles CSV uploads and coordinates with lead_agent and website_generator
 import os
 import json
 from io import StringIO
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Flask, request, jsonify, send_from_directory
 from dotenv import load_dotenv
 import anthropic
 from lead_agent import qualify_leads, generate_website_spec
@@ -17,14 +16,9 @@ import redis
 
 load_dotenv()
 
-app = Flask(__name__)
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+DASHBOARD_DIR = os.path.join(os.path.dirname(__file__), 'web-dashboard', 'public')
+
+app = Flask(__name__, static_folder=DASHBOARD_DIR, static_url_path='')
 
 # Initialize Redis client for storing generated websites
 try:
@@ -36,9 +30,12 @@ try:
 except:
     redis_client = None
 
+@app.route('/')
+def index():
+    return send_from_directory(DASHBOARD_DIR, 'index.html')
+
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
     return jsonify({"status": "ok"}), 200
 
 @app.route('/api/process-csv', methods=['POST'])
