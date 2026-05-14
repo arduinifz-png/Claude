@@ -48,6 +48,9 @@ project_root = os.path.dirname(os.path.dirname(api_dir))
 sys.path.insert(0, project_root)
 from website_generator import generate_full_html
 
+# Dashboard directory for serving static files
+dashboard_dir = os.path.join(os.path.dirname(api_dir), 'public')
+
 
 def read_csv_content(csv_text: str) -> list[dict]:
     """Parse CSV content from text."""
@@ -111,14 +114,12 @@ Respond in JSON format with these exact keys: purpose, seo_strategy, content_arc
 @app.route('/')
 def index():
     """Serve the dashboard."""
-    dashboard_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'web-dashboard', 'public')
     return send_from_directory(dashboard_dir, 'index.html')
 
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files."""
-    dashboard_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'web-dashboard', 'public')
     return send_from_directory(dashboard_dir, filename)
 
 
