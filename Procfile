@@ -1,1 +1,1 @@
-web: cd web-dashboard/api && python app.py
+web: cd web-dashboard/api && gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120

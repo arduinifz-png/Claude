@@ -41,15 +41,33 @@ if redis_url and redis_url != "redis://localhost:6379":
         print(f"Warning: Could not connect to Redis at {redis_url}: {e}")
         redis_client = None
 
-# Import website generator
+# Import website generator and set up paths
 import sys
-api_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(api_dir))
-sys.path.insert(0, project_root)
+from pathlib import Path
+
+# Use Path for robust cross-platform path handling
+app_file = Path(__file__).resolve()
+api_dir = app_file.parent  # /app/web-dashboard/api
+web_dashboard_dir = api_dir.parent  # /app/web-dashboard
+project_root = web_dashboard_dir.parent  # /app
+
+sys.path.insert(0, str(project_root))
 from website_generator import generate_full_html
 
 # Dashboard directory for serving static files
-dashboard_dir = os.path.join(os.path.dirname(api_dir), 'public')
+dashboard_dir = str(web_dashboard_dir / 'public')
+
+# Log startup info for debugging
+print(f"Flask app starting...")
+print(f"  app_file: {app_file}")
+print(f"  api_dir: {api_dir}")
+print(f"  web_dashboard_dir: {web_dashboard_dir}")
+print(f"  project_root: {project_root}")
+print(f"  dashboard_dir: {dashboard_dir}")
+print(f"  dashboard_dir exists: {Path(dashboard_dir).exists()}")
+if Path(dashboard_dir).exists():
+    files = list(Path(dashboard_dir).iterdir())
+    print(f"  files in dashboard_dir: {[f.name for f in files[:5]]}")
 
 
 def read_csv_content(csv_text: str) -> list[dict]:
@@ -114,13 +132,22 @@ Respond in JSON format with these exact keys: purpose, seo_strategy, content_arc
 @app.route('/')
 def index():
     """Serve the dashboard."""
-    return send_from_directory(dashboard_dir, 'index.html')
+    try:
+        print(f"Serving dashboard from: {dashboard_dir}")
+        return send_from_directory(dashboard_dir, 'index.html')
+    except Exception as e:
+        print(f"Error serving dashboard: {e}")
+        return jsonify({"error": f"Failed to serve dashboard: {str(e)}"}), 500
 
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files."""
-    return send_from_directory(dashboard_dir, filename)
+    try:
+        return send_from_directory(dashboard_dir, filename)
+    except Exception as e:
+        print(f"Error serving static file {filename}: {e}")
+        return jsonify({"error": f"Failed to serve file: {str(e)}"}), 500
 
 
 @app.route('/api/health', methods=['GET'])
