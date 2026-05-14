@@ -12,7 +12,7 @@ import uuid
 from io import StringIO
 from pathlib import Path
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import anthropic
 import redis
@@ -24,10 +24,11 @@ CORS(app)
 
 # Initialize clients
 api_key = os.environ.get("ANTHROPIC_API_KEY")
-if not api_key:
-    raise ValueError("ANTHROPIC_API_KEY not found in environment")
-
-client = anthropic.Anthropic(api_key=api_key)
+client = None
+if api_key:
+    client = anthropic.Anthropic(api_key=api_key)
+else:
+    print("Warning: ANTHROPIC_API_KEY not set. Website generation will not work.")
 
 # Redis/Upstash connection
 redis_url = os.environ.get("UPSTASH_REDIS_URL")
@@ -46,6 +47,9 @@ api_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(api_dir))
 sys.path.insert(0, project_root)
 from website_generator import generate_full_html
+
+# Dashboard directory for serving static files
+dashboard_dir = os.path.join(os.path.dirname(api_dir), 'public')
 
 
 def read_csv_content(csv_text: str) -> list[dict]:
@@ -66,6 +70,9 @@ def qualify_leads(leads: list[dict]) -> list[dict]:
 
 def generate_website_spec(lead: dict) -> dict:
     """Use Claude to generate website specification."""
+    if not client:
+        raise ValueError("ANTHROPIC_API_KEY not configured. Cannot generate website specifications.")
+
     lead_info = json.dumps(lead, indent=2)
 
     prompt = f"""You are a expert web designer and SEO strategist. Based on this lead information, generate a comprehensive website specification with great SEO.
@@ -102,6 +109,18 @@ Respond in JSON format with these exact keys: purpose, seo_strategy, content_arc
         spec = {"purpose": "Website specification generation", "raw_response": message.content[0].text}
 
     return {"lead": lead, "website_spec": spec}
+
+
+@app.route('/')
+def index():
+    """Serve the dashboard."""
+    return send_from_directory(dashboard_dir, 'index.html')
+
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files."""
+    return send_from_directory(dashboard_dir, filename)
 
 
 @app.route('/api/health', methods=['GET'])
