@@ -12,7 +12,7 @@ import uuid
 from io import StringIO
 from pathlib import Path
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import anthropic
 import redis
@@ -106,6 +106,20 @@ Respond in JSON format with these exact keys: purpose, seo_strategy, content_arc
         spec = {"purpose": "Website specification generation", "raw_response": message.content[0].text}
 
     return {"lead": lead, "website_spec": spec}
+
+
+@app.route('/')
+def index():
+    """Serve the dashboard."""
+    dashboard_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'web-dashboard', 'public')
+    return send_from_directory(dashboard_dir, 'index.html')
+
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files."""
+    dashboard_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'web-dashboard', 'public')
+    return send_from_directory(dashboard_dir, filename)
 
 
 @app.route('/api/health', methods=['GET'])
